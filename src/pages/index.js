@@ -7,6 +7,7 @@ import {
   FaSortDown,
   FaSearch,
   FaSpinner,
+  FaBookmark,
 } from "react-icons/fa";
 import { IoIosCloseCircle } from "react-icons/io";
 import axios from "axios";
@@ -21,12 +22,15 @@ const CityTable = ({ initialCities }) => {
   const [currentWeather, setCurrentWeather] = useState(null);
   const [selectedCity, setSelectedCity] = useState(null);
   const [locationAvailable, setLocationAvailable] = useState(false);
+  const [bookmarks, setBookmarks] = useState([]);
+  const [bookmarkDropdownOpen, setBookmarkDropdownOpen] = useState(false);
 
   useEffect(() => {
     fetchCities();
   }, [search, page, sortKey, sortOrder]);
 
   useEffect(() => {
+    loadBookmarks();
     if (navigator.geolocation) {
       navigator.geolocation.getCurrentPosition(
         (position) => {
@@ -92,9 +96,27 @@ const CityTable = ({ initialCities }) => {
     return sortOrder === "ASC" ? <FaSortUp /> : <FaSortDown />;
   };
 
+  const toggleBookmark = (city) => {
+    const updatedBookmarks = bookmarks.find((b) => b.recordid === city.recordid)
+      ? bookmarks.filter((b) => b.recordid !== city.recordid)
+      : [...bookmarks, city];
+
+    setBookmarks(updatedBookmarks);
+    localStorage.setItem("bookmarks", JSON.stringify(updatedBookmarks));
+  };
+
+  const loadBookmarks = () => {
+    const storedBookmarks = JSON.parse(localStorage.getItem("bookmarks")) || [];
+    setBookmarks(storedBookmarks);
+  };
+
+  const toggleBookmarkDropdown = () => {
+    setBookmarkDropdownOpen(!bookmarkDropdownOpen);
+  };
+
   return (
     <div className="container mx-auto p-4">
-      <h1 className="heading">Weather Forecast Website.</h1>
+      <h1 className="heading">Weather Forecast Website</h1>
 
       <div className="flex mb-4 border border-gray-300 rounded p-2">
         <input
@@ -116,7 +138,58 @@ const CityTable = ({ initialCities }) => {
           <FaSearch size={20} className="mr-2 text-gray-500" />
         )}
       </div>
-      <table className="min-w-full bg-white border border-gray-200">
+
+      <div class="relative">
+        <div>
+          <button
+            type="button"
+            class="inline-flex w-full justify-center gap-x-1.5 rounded-md bg-white px-3 py-2 text-sm font-semibold text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 hover:bg-gray-50"
+            id="menu-button"
+            aria-expanded="true"
+            aria-haspopup="true"
+            onClick={toggleBookmarkDropdown}
+          >
+            Bookmarked Cities
+            <svg
+              class="-mr-1 h-5 w-5 text-gray-400"
+              viewBox="0 0 20 20"
+              fill="currentColor"
+              aria-hidden="true"
+            >
+              <path
+                fill-rule="evenodd"
+                d="M5.23 7.21a.75.75 0 011.06.02L10 11.168l3.71-3.938a.75.75 0 111.08 1.04l-4.25 4.5a.75.75 0 01-1.08 0l-4.25-4.5a.75.75 0 01.02-1.06z"
+                clip-rule="evenodd"
+              />
+            </svg>
+          </button>
+        </div>
+        {bookmarkDropdownOpen && (
+          <div className="absolute bg-white shadow-lg rounded mt-2 p-4 w-64 z-10">
+            {bookmarks.length > 0 ? (
+              bookmarks.map((city) => (
+                <div
+                  key={city.recordid}
+                  className="p-2 m-2 border border-gray-300 rounded flex justify-between items-center"
+                >
+                  <Link href={`/weather/${city.fields.coordinates}`}>
+                    {city.fields.name}
+                  </Link>
+                  <IoIosCloseCircle
+                    size={20}
+                    className="ml-2 text-red-500 cursor-pointer"
+                    onClick={() => toggleBookmark(city)}
+                  />
+                </div>
+              ))
+            ) : (
+              <div>No bookmarks added.</div>
+            )}
+          </div>
+        )}
+      </div>
+
+      <table className="min-w-full bg-white border border-gray-200 mt-4">
         <thead>
           <tr>
             <th
@@ -137,7 +210,8 @@ const CityTable = ({ initialCities }) => {
             >
               Timezone {renderSortIcon("fields.timezone")}
             </th>
-            <th className="cursor-pointer p-2 border-b">Weather View</th>
+            <th className="p-2 border-b">Weather View</th>
+            <th className="p-2 border-b">Bookmark</th>
           </tr>
         </thead>
         <tbody>
@@ -154,8 +228,21 @@ const CityTable = ({ initialCities }) => {
               </td>
               <td className="p-2">{city.fields.cou_name_en}</td>
               <td className="p-2">{city.fields.timezone}</td>
-              <td>
+              <td className="p-2">
                 <Link href={`/weather/${city.fields.coordinates}`}>View</Link>
+              </td>
+              <td className="p-2">
+                <FaBookmark
+                  className={`cursor-pointer ${
+                    bookmarks.find((b) => b.recordid === city.recordid)
+                      ? "text-yellow-500"
+                      : "text-gray-400"
+                  }`}
+                  onClick={(e) => {
+                    e.stopPropagation(); // Prevent triggering row click
+                    toggleBookmark(city);
+                  }}
+                />
               </td>
             </tr>
           ))}

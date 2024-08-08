@@ -17,6 +17,8 @@ export default function Weather({ currentData, forecastData }) {
   const [forecast, setForecast] = useState(forecastData);
   const [currentTime, setCurrentTime] = useState("");
 
+  // console.log(forecast);
+
   useEffect(() => {
     const timer = setInterval(() => {
       setCurrentTime(moment().format("hh:mm:ss A"));
@@ -24,18 +26,18 @@ export default function Weather({ currentData, forecastData }) {
     return () => clearInterval(timer);
   }, []);
 
-  const getTimeOfDay = (date) => {
-    const hours = new Date(date * 1000).getHours();
-    if (hours >= 5 && hours < 12) {
-      return "morning";
-    } else if (hours >= 12 && hours < 17) {
-      return "afternoon";
-    } else if (hours >= 17 && hours < 20) {
-      return "evening";
-    } else {
-      return "night";
-    }
-  };
+  // const getTimeOfDay = (date) => {
+  //   const hours = new Date(date * 1000).getHours();
+  //   if (hours >= 5 && hours < 12) {
+  //     return "morning";
+  //   } else if (hours >= 12 && hours < 17) {
+  //     return "afternoon";
+  //   } else if (hours >= 17 && hours < 20) {
+  //     return "evening";
+  //   } else {
+  //     return "night";
+  //   }
+  // };
 
   const getAggregatedForecast = () => {
     const dailyForecast = {};
@@ -201,12 +203,14 @@ export default function Weather({ currentData, forecastData }) {
               ) : null}
               <p className="text-sm">Feels Like</p>
             </div>
+
             <div className="humidity">
               {data.main ? (
                 <p className="bold text-2xl font-bold">{data.main.humidity}%</p>
               ) : null}
               <p className="text-sm">Humidity</p>
             </div>
+
             <div className="wind">
               {data.wind ? (
                 <p className="bold text-2xl font-bold">
@@ -214,6 +218,24 @@ export default function Weather({ currentData, forecastData }) {
                 </p>
               ) : null}
               <p className="text-sm">Wind Speed</p>
+            </div>
+
+            <div className="feels">
+              {data.main ? (
+                <p className="bold text-2xl font-bold">
+                  {data.main.temp_min.toFixed()}°C
+                </p>
+              ) : null}
+              <p className="text-sm">Temperature-Min</p>
+            </div>
+
+            <div className="feels">
+              {data.main ? (
+                <p className="bold text-2xl font-bold">
+                  {data.main.temp_max.toFixed()}°C
+                </p>
+              ) : null}
+              <p className="text-sm">Temperature-Max</p>
             </div>
           </div>
         )}
