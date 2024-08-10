@@ -9,8 +9,10 @@ import {
   WiDayRain,
   WiNightAltRain,
 } from "react-icons/wi";
+import { IoMdArrowRoundBack } from "react-icons/io";
 import moment from "moment";
 import Image from "next/image";
+import Link from "next/link";
 
 export default function Weather({ currentData, forecastData }) {
   const [data, setData] = useState(currentData);
@@ -164,6 +166,9 @@ export default function Weather({ currentData, forecastData }) {
     <div className="app min-h-screen flex items-center justify-center">
       <div className="container bg-white shadow-md rounded-lg p-6">
         {/* Current Weather */}
+        <Link href="/">
+          <IoMdArrowRoundBack size={20} className="mr-2 text-gray-500" />
+        </Link>
         <div className="top text-center mb-4">
           <div className="location text-xl font-semibold">
             <p>
